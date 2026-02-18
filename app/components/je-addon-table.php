@@ -58,7 +58,7 @@ class JE_AddOn_Table extends WP_List_Table
             $components = array();
         }
         if (in_array($item['col_id'], $components)) {
-            $html .= '<br><a class="mm-plugin" data-type="deactive" data-id="' . esc_attr($item['col_id']) . '" href="#">' . __('Deaktiviere <i class="fa fa-circle-o-notch fa-spin loader-ani hide"></i>', 'psjb') . '</a>';
+            $html .= '<br><a class="mm-plugin" data-type="deactive" data-id="' . esc_attr($item['col_id']) . '" href="#">' . __('Deaktivieren <i class="fa fa-circle-o-notch fa-spin loader-ani hide"></i>', 'psjb') . '</a>';
         } else {
             //check the requirement
             if (!empty($item['required'])) {

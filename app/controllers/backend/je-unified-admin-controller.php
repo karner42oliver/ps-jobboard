@@ -14,9 +14,12 @@ class JE_Unified_Admin_Controller extends IG_Request {
 
 	public function __construct() {
 		add_action( 'admin_menu', array( &$this, 'register_menu' ), 5 );
-		add_action( 'admin_menu', array( &$this, 'cleanup_old_menus' ), 99 );
+		add_action( 'admin_menu', array( &$this, 'register_legacy_redirects' ), 99 );
 		add_filter( 'custom_menu_order', '__return_true' );
 		add_filter( 'menu_order', array( &$this, 'menu_order' ) );
+		
+		// Catch legacy edit.php URLs with jobs-plus-menu page - redirect BEFORE WordPress loads it
+		add_action( 'load-edit.php', array( &$this, 'redirect_legacy_edit_page' ), 1 );
 		
 		// Load sub-controllers
 		$admin_job_class_name    = apply_filters( 'je_admin_job_class_name', 'JE_Job_Admin_Controller' );
@@ -96,13 +99,41 @@ class JE_Unified_Admin_Controller extends IG_Request {
 	}
 
 	/**
-	 * Clean up old duplicate CPT menus at the top level
-	 * They should only appear under the Jobboard menu
+	 * Register hidden submenu pages for legacy URL redirects
 	 */
-	public function cleanup_old_menus() {
-		// Remove the standalone CPT menus so they only appear under Jobboard
-		remove_menu_page( 'edit.php?post_type=jbp_job' );
-		remove_menu_page( 'edit.php?post_type=jbp_pro' );
+	public function register_legacy_redirects() {
+		// Register hidden page for old job settings URL
+		add_submenu_page(
+			'je-jobboard',
+			'',
+			'',
+			'manage_options',
+			'jobs-plus-menu',
+			array( &$this, 'legacy_redirect_callback' )
+		);
+	}
+
+	/**
+	 * Redirect legacy edit.php URLs before WordPress checks permissions
+	 */
+	public function redirect_legacy_edit_page() {
+		// Check if this is a jobs-plus-menu page request
+		$page = isset( $_GET['page'] ) ? sanitize_key( $_GET['page'] ) : '';
+		
+		if ( 'jobs-plus-menu' === $page ) {
+			$tab = isset( $_GET['tab'] ) ? sanitize_key( $_GET['tab'] ) : 'general';
+			wp_redirect( admin_url( "admin.php?page=je-jobboard-settings&tab={$tab}" ) );
+			exit;
+		}
+	}
+
+	/**
+	 * Callback for legacy redirect pages (hidden under Jobboard)
+	 */
+	public function legacy_redirect_callback() {
+		$tab = isset( $_GET['tab'] ) ? sanitize_key( $_GET['tab'] ) : 'general';
+		wp_redirect( admin_url( "admin.php?page=je-jobboard-settings&tab={$tab}" ) );
+		exit;
 	}
 
 	/**
