@@ -227,14 +227,6 @@ if (!class_exists('IG_Social_Wall')) {
 
         public function get_social_list()
         {
-            $list = array();
-            foreach ((array)glob($this->plugin_url . 'assets/social_icon/*.png') as $file) {
-                $list[pathinfo($file, PATHINFO_FILENAME)] = array(
-                    'key' => pathinfo($file, PATHINFO_FILENAME),
-                    'name' => ucfirst(pathinfo($file, PATHINFO_FILENAME)),
-                    'url' => $this->plugin_url . 'assets/social_icon/' . pathinfo($file, PATHINFO_BASENAME)
-                );
-            }
             $social_list = array(
                 'blogger' =>
                     array(
@@ -252,29 +244,20 @@ if (!class_exists('IG_Social_Wall')) {
                         'type' => 'url',
                         'url' => $this->plugin_url . 'assets/social_icon/deviantart.png',
                     ),
-                'digg' =>
-                    array(
-                        'key' => 'digg',
-                        'name' => 'Digg',
-                        'type' => 'url',
-                        'domain' => 'digg.com',
-                        'url' => $this->plugin_url . 'assets/social_icon/digg.png',
-                    ),
                 'dribble' =>
                     array(
                         'key' => 'dribble',
-                        'name' => 'Dribble',
+                        'name' => 'Dribbble',
                         'type' => 'url',
                         'domain' => 'dribbble.com',
                         'url' => $this->plugin_url . 'assets/social_icon/dribble.png',
                     ),
-                'dropbox' =>
+                'discord' =>
                     array(
-                        'key' => 'dropbox',
-                        'name' => 'Dropbox',
-                        'type' => 'url',
-                        'domain' => 'dropbox.com',
-                        'url' => $this->plugin_url . 'assets/social_icon/dropbox.png',
+                        'key' => 'discord',
+                        'name' => 'Discord',
+                        'type' => 'text',
+                        'url' => $this->plugin_url . 'assets/social_icon/discord.png',
                     ),
                 'email' =>
                     array(
@@ -282,14 +265,6 @@ if (!class_exists('IG_Social_Wall')) {
                         'name' => 'Email',
                         'type' => 'email',
                         'url' => $this->plugin_url . 'assets/social_icon/email.png',
-                    ),
-                'engadget' =>
-                    array(
-                        'key' => 'engadget',
-                        'name' => 'Engadget',
-                        'type' => 'url',
-                        'domain' => 'engadget.com',
-                        'url' => $this->plugin_url . 'assets/social_icon/engadget.png',
                     ),
                 'fb' =>
                     array(
@@ -307,21 +282,13 @@ if (!class_exists('IG_Social_Wall')) {
                         'domain' => 'flickr.com',
                         'url' => $this->plugin_url . 'assets/social_icon/flickr.png',
                     ),
-                'google+' =>
+                'github' =>
                     array(
-                        'key' => 'google+',
-                        'name' => 'Google Plus',
+                        'key' => 'github',
+                        'name' => 'GitHub',
                         'type' => 'url',
-                        'domain' => 'google.com',
-                        'url' => $this->plugin_url . 'assets/social_icon/google+.png',
-                    ),
-                'google_hangouts' =>
-                    array(
-                        'key' => 'google_hangouts',
-                        'name' => 'Google Hangouts',
-                        'type' => 'text',
-                        'domain' => '',
-                        'url' => $this->plugin_url . 'assets/social_icon/google_hangouts.png',
+                        'domain' => 'github.com',
+                        'url' => $this->plugin_url . 'assets/social_icon/github.png',
                     ),
                 'instagram' =>
                     array(
@@ -334,18 +301,10 @@ if (!class_exists('IG_Social_Wall')) {
                 'linkedin' =>
                     array(
                         'key' => 'linkedin',
-                        'name' => 'Linkedin',
+                        'name' => 'LinkedIn',
                         'domain' => 'linkedin.com',
                         'type' => 'url',
                         'url' => $this->plugin_url . 'assets/social_icon/linkedin.png',
-                    ),
-                'myspace' =>
-                    array(
-                        'key' => 'myspace',
-                        'name' => 'Myspace',
-                        'type' => 'url',
-                        'domain' => 'myspace.com',
-                        'url' => $this->plugin_url . 'assets/social_icon/myspace.png',
                     ),
                 'pinterest' =>
                     array(
@@ -366,7 +325,7 @@ if (!class_exists('IG_Social_Wall')) {
                 'rss' =>
                     array(
                         'key' => 'rss',
-                        'name' => 'Rss',
+                        'name' => 'RSS',
                         'type' => 'url',
                         'url' => $this->plugin_url . 'assets/social_icon/rss.png',
                     ),
@@ -377,14 +336,6 @@ if (!class_exists('IG_Social_Wall')) {
                         'type' => 'text',
                         'url' => $this->plugin_url . 'assets/social_icon/skype.png',
                     ),
-                'trillian' =>
-                    array(
-                        'key' => 'trillian',
-                        'name' => 'Trillian',
-                        'type' => 'url',
-                        'domain' => 'trillian.com',
-                        'url' => $this->plugin_url . 'assets/social_icon/trillian.png',
-                    ),
                 'tumblr' =>
                     array(
                         'key' => 'tumblr',
@@ -393,10 +344,26 @@ if (!class_exists('IG_Social_Wall')) {
                         'domain' => 'tumblr.com',
                         'url' => $this->plugin_url . 'assets/social_icon/tumblr.png',
                     ),
+                'tiktok' =>
+                    array(
+                        'key' => 'tiktok',
+                        'name' => 'TikTok',
+                        'type' => 'url',
+                        'domain' => 'tiktok.com',
+                        'url' => $this->plugin_url . 'assets/social_icon/tiktok.png',
+                    ),
+                'twitch' =>
+                    array(
+                        'key' => 'twitch',
+                        'name' => 'Twitch',
+                        'type' => 'url',
+                        'domain' => 'twitch.tv',
+                        'url' => $this->plugin_url . 'assets/social_icon/twitch.png',
+                    ),
                 'twitter' =>
                     array(
                         'key' => 'twitter',
-                        'name' => 'Twitter',
+                        'name' => 'Twitter/X',
                         'type' => 'url',
                         'domain' => 'twitter.com',
                         'url' => $this->plugin_url . 'assets/social_icon/twitter.png',
@@ -404,37 +371,14 @@ if (!class_exists('IG_Social_Wall')) {
                 'wordpress' =>
                     array(
                         'key' => 'wordpress',
-                        'name' => 'Wordpress',
+                        'name' => 'WordPress',
                         'type' => 'url',
                         'url' => $this->plugin_url . 'assets/social_icon/wordpress.png',
-                    ),
-                'xda' =>
-                    array(
-                        'key' => 'xda',
-                        'name' => 'Xda',
-                        'type' => 'url',
-                        'domain' => 'xda-developers.com',
-                        'url' => $this->plugin_url . 'assets/social_icon/xda.png',
-                    ),
-                'yahoo' =>
-                    array(
-                        'key' => 'yahoo',
-                        'name' => 'Yahoo',
-                        'type' => 'text',
-                        'url' => $this->plugin_url . 'assets/social_icon/yahoo.png',
-                    ),
-                'yelp' =>
-                    array(
-                        'key' => 'yelp',
-                        'name' => 'Yelp',
-                        'type' => 'url',
-                        'domain' => 'yelp.com',
-                        'url' => $this->plugin_url . 'assets/social_icon/yelp.png',
                     ),
                 'youtube' =>
                     array(
                         'key' => 'youtube',
-                        'name' => 'Youtube',
+                        'name' => 'YouTube',
                         'type' => 'url',
                         'domain' => 'youtube.com',
                         'url' => $this->plugin_url . 'assets/social_icon/youtube.png',

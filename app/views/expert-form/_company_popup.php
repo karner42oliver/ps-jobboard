@@ -1,5 +1,5 @@
 <div class="hide" id="company-template">
-    <form class="can-edit-form form-horizontal" style="width100%;">
+    <form class="can-edit-form form-horizontal" style="width: 100%;">
         <div class="form-group">
             <label class="col-md-3 control-label"><?php _e("Unternehmen", 'psjb') ?></label>
 

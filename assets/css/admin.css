@@ -298,3 +298,150 @@ a.jbp_button.jbp_experts_pages:hover:before {
 	text-decoration: underline;
 }
 
+/* EXPERT FORM INLINE EDITING */
+.inline-edit-field textarea {
+	border: 1px solid #d1d5db !important;
+	padding: 8px 10px !important;
+	font-size: 14px !important;
+	border-radius: 3px !important;
+	resize: both;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.inline-edit-field textarea:focus {
+	border-color: #3b82f6 !important;
+	box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1) !important;
+	outline: none;
+}
+
+/* SCEditor Icon Fix */
+.sceditor-container {
+	border: 1px solid #d1d5db !important;
+	border-radius: 3px !important;
+}
+
+.sceditor-container .sceditor-toolbar {
+	background: #f9fafb;
+	border-bottom: 1px solid #e5e7eb;
+	padding: 8px;
+}
+
+.sceditor-button {
+	display: inline-block !important;
+	width: 20px !important;
+	height: 20px !important;
+	margin: 2px !important;
+	padding: 0 !important;
+	background-size: 20px 20px !important;
+	background-position: center !important;
+	background-repeat: no-repeat !important;
+	opacity: 0.8;
+}
+
+.sceditor-button:hover {
+	opacity: 1;
+	background-color: rgba(59, 130, 246, 0.1);
+	border-radius: 2px;
+}
+
+.sceditor-button.disabled {
+	opacity: 0.4;
+	cursor: not-allowed;
+}
+
+.sceditor-container textarea {
+	min-height: 300px !important;
+	padding: 12px !important;
+	font-size: 14px !important;
+	line-height: 1.6;
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+	.sceditor-button {
+		width: 18px !important;
+		height: 18px !important;
+		background-size: 18px 18px !important;
+	}
+}
+
+
+/* Inline name inputs in page-header */
+.inline-edit-name {
+	border: none !important;
+	padding: 0 !important;
+	font-size: 32px !important;
+	font-weight: bold !important;
+	margin: 0 !important;
+	box-shadow: none !important;
+	background: transparent !important;
+	border-bottom: 2px solid #ddd !important;
+}
+
+.inline-edit-name:focus {
+	border-bottom: 2px solid #3b82f6 !important;
+	outline: none;
+}
+
+/* Inline edit fields in info rows */
+.page-header .form-control {
+	border: none !important;
+	padding: 0 !important;
+	box-shadow: none !important;
+	background: transparent !important;
+	border-bottom: 1px solid #ddd !important;
+	border-radius: 0 !important;
+	font-size: 14px !important;
+}
+
+.page-header .form-control:focus {
+	border-bottom: 1px solid #3b82f6 !important;
+	outline: none;
+}
+
+/* Form controls in data rows */
+.jobs-expert-form .row .form-control {
+	border: none !important;
+	padding: 0 !important;
+	box-shadow: none !important;
+	background: transparent !important;
+	border-bottom: 1px solid #ddd !important;
+	border-radius: 0 !important;
+	font-size: 14px !important;
+	min-height: auto;
+	line-height: 1.6;
+}
+
+.jobs-expert-form .row .form-control:focus {
+	border-bottom: 1px solid #3b82f6 !important;
+	outline: none;
+	background: rgba(255,255,255,0.5) !important;
+}
+
+/* Biography textarea in tab */
+#biography-editor {
+	border: 1px solid #d1d5db !important;
+	padding: 10px !important;
+	border-radius: 3px !important;
+}
+
+#biography-editor:focus {
+	border-color: #3b82f6 !important;
+	box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1) !important;
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+	.inline-edit-name {
+		font-size: 24px !important;
+	}
+
+	.col-md-4, .col-md-8, .col-md-6 {
+		width: 100% !important;
+	}
+
+	.form-control {
+		font-size: 16px !important; /* Prevents iOS zoom */
+	}
+}
+

@@ -6,6 +6,9 @@
             <i class="glyphicon glyphicon-plus"></i></button>
     </div>
     <div class="panel-body">
+        <!-- Inline Formular Container -->
+        <div class="skill-form-container" style="display:none; margin-bottom: 20px;"></div>
+        
         <div class="jbp-skillbars">
             <?php
             foreach ($models as $model) {
