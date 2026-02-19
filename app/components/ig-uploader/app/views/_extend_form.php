@@ -10,11 +10,14 @@ $f_id = uniqid();
             <small
                 class="hidden-md hidden-lg"><?php echo $attributes['title'] ?></small>
         </div>
-        <section class="panel-body file-view-port">
+        <section id="<?php echo $c_id ?>" class="panel-body file-view-port">
         <button type="button"
                     class="btn btn-primary btn-xs pull-right add-file"><?php _e('Hinzufügen', ig_uploader()->domain) ?> <i
                     class="glyphicon glyphicon-plus"></i>
             </button>
+            
+            <!-- Inline Uploader Form Container -->
+            <div class="uploader-form-container" style="display:none; margin-bottom: 20px;"></div>
             <?php if (is_array($models) && count($models)): ?>
                 <?php foreach ($models as $model): ?>
                     <?php $this->render_partial(apply_filters('igu_single_file_template', '_single_file'), array(

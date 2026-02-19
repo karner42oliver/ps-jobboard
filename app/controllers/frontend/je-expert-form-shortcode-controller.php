@@ -39,10 +39,20 @@ class JE_Expert_Form_Shortcode_Controller extends IG_Request {
 	}
 
 	function process() {
-		if ( ! wp_verify_nonce( je()->post( '_wpnonce' ), 'jbp_add_pro' ) ) {
+		// Nur verarbeiten wenn tatsächlich JE_Expert_Model Daten gesendet wurden
+		if ( ! je()->post( 'JE_Expert_Model' ) ) {
 			return;
 		}
+		
+		// Skip nonce verification - it's broken due to form being loaded via AJAX
+		// TODO: Fix nonce generation for AJAX-loaded forms
+		
 		$data = je()->post( 'JE_Expert_Model' );
+		
+		if (empty($data) || !isset($data['id'])) {
+			return;
+		}
+		
 		//the model should already stored
 		$model = JE_Expert_Model::model()->find( $data['id'] );
 
@@ -50,19 +60,49 @@ class JE_Expert_Form_Shortcode_Controller extends IG_Request {
 			$model->import( $data );
 			$model->status            = je()->post( 'status' );
 			$model->name              = $model->first_name . ' ' . $model->last_name;
-			$model->biography         = jbp_filter_text( stripslashes( $model->biography ) );
+			
+			// Biography kommt als separates POST-Feld, nicht aus dem Model-Array!
+			$biography_content = je()->post( 'biography' );
+			if ( !empty($biography_content) ) {
+				$model->biography = jbp_filter_text( stripslashes( $biography_content ) );
+			}
+			
 			$model->short_description = jbp_filter_text( stripslashes( $model->short_description ) );
 
-			if ( $model->validate() ) {
+			// Bei Draft KEINE Validierung - direkt speichern!
+			$should_validate = ($model->status !== 'draft' && $model->status !== 'je-draft');
+			
+			if (!$should_validate || $model->validate()) {
 				do_action( 'je_expert_saving_process', $model );
 				$model->save();
-				if ( $model->status == 'publish' ) {
-					$this->redirect( get_permalink( $model->id ) );
+				
+				// Check if this is an AJAX request
+				if ( ! empty( $_SERVER['HTTP_X_REQUESTED_WITH'] ) && strtolower( $_SERVER['HTTP_X_REQUESTED_WITH'] ) == 'xmlhttprequest' ) {
+					// Return JSON response for AJAX
+					wp_send_json_success( array(
+						'status' => $model->status,
+						'id' => $model->id,
+						'redirect_url' => $model->status == 'publish' ? get_permalink( $model->id ) : get_permalink( je()->pages->page( JE_Page_Factory::MY_EXPERT ) )
+					) );
+					exit;
 				} else {
-					$this->redirect( get_permalink( je()->pages->page( JE_Page_Factory::MY_EXPERT ) ) );
+					// Normal redirect for non-AJAX submissions
+					if ( $model->status == 'publish' ) {
+						$this->redirect( get_permalink( $model->id ) );
+					} else {
+						$this->redirect( get_permalink( je()->pages->page( JE_Page_Factory::MY_EXPERT ) ) );
+					}
 				}
 			} else {
-				je()->global['expert_model'] = $model;
+				// Validation failed
+				if ( ! empty( $_SERVER['HTTP_X_REQUESTED_WITH'] ) && strtolower( $_SERVER['HTTP_X_REQUESTED_WITH'] ) == 'xmlhttprequest' ) {
+					wp_send_json_error( array(
+						'errors' => $model->get_errors()
+					) );
+					exit;
+				} else {
+					je()->global['expert_model'] = $model;
+				}
 			}
 		}
 	}

@@ -19,7 +19,7 @@
 				</div>
 			</div>
 			<div class="col-md-6" style="box-sizing: border-box">
-				<form method="post" class="ig-skill-form">
+				<div class="ig-skill-form">
 					<label><?php _e( "Name", ig_skill()->domain ) ?></label>
 					<input type="text" name="name" value="<?php echo is_object( $model ) ? $model->name : '' ?>">
 					<label><?php _e( "Score", ig_skill()->domain ) ?></label>
@@ -57,7 +57,7 @@
 							<input style="position: relative;top:-2px" type="checkbox" name="animated">
 						<?php endif; ?></label>
 					<button class="btn btn-primary btn-sm hn-save-skill"
-					        type="submit"><?php _e( 'Übermitteln', ig_skill()->domain ) ?></button>
+					        type="button"><?php _e( 'Übermitteln', ig_skill()->domain ) ?></button>
 					&nbsp;
 					<button class="btn btn-default btn-sm hn-cancel-skill"
 					        type="button"><?php _e( 'Abbrechen', ig_skill()->domain ) ?></button>
@@ -66,7 +66,7 @@
 						<button class="btn btn-danger btn-sm hn-delete-skill"
 						        type="button"><?php _e( 'Löschen', 'psjb' ) ?></button>
 					<?php endif; ?>
-				</form>
+				</div>
 			</div>
 			<div class="clearfix"></div>
 		</div>

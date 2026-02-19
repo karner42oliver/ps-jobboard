@@ -1,4 +1,7 @@
 <?php if (is_array($models) && count($models)): ?>
+    <!-- Inline Formular Container -->
+    <div class="uploader-form-container" style="display:none; margin-bottom: 20px;"></div>
+    
     <div class="file-view-port">
         <?php foreach ($models as $model): ?>
             <?php $this->render_partial(apply_filters('igu_icon_file_template', '_single_icon'), array(

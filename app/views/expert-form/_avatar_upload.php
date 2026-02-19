@@ -5,9 +5,24 @@
         </div>
         <div class="panel-footer">
             <?php if (je()->can_upload_avatar()): ?>
-                <button type="button" class="btn btn-primary btn-sm change-avatar">
+                <button type="button" class="btn btn-primary btn-sm toggle-avatar-upload">
                     <?php _e("Avatar ändern", 'psjb') ?>
                 </button>
+                
+                <!-- Inline Avatar Upload Form -->
+                <div class="avatar-upload-form" style="display:none; margin-top: 15px; padding: 15px; background: #f5f5f5; border-radius: 4px;">
+                    <div class="alert alert-danger" style="display:none;"></div>
+                    <div class="file-uploader-form" style="margin: 0;">
+                        <div class="form-group">
+                            <label><?php _e("Bild auswählen", 'psjb') ?></label>
+                            <input type="file" name="hn_uploader_element" class="hn_uploader_element form-control" accept="image/*" style="margin-bottom: 10px;">
+                            <small class="form-text text-muted"><?php echo sprintf(__("Max. Größe: %s MB", 'psjb'), get_max_file_upload()) ?></small>
+                        </div>
+                        <input type="hidden" name="parent_id" value="<?php echo $model->id ?>">
+                        <button type="button" class="btn btn-success btn-sm avatar-submit-btn"><?php _e("Hochladen", 'psjb') ?></button>
+                        <button type="button" class="btn btn-default btn-sm cancel-avatar-upload"><?php _e("Abbrechen", 'psjb') ?></button>
+                    </div>
+                </div>
             <?php else: ?>
                 <?php _e("Du hast keine Berechtigung zum Hochladen eines Avatars", 'psjb') ?>
             <?php endif; ?>
@@ -17,54 +32,24 @@
 <?php if (je()->can_upload_avatar()): ?>
     <script type="text/javascript">
         jQuery(function ($) {
-            $('.change-avatar').webuiPopover({
-                content: function () {
-                    var content = $('<div class="ig-container"></div>');
-                    var html = $('#je_avatar_uploader').html();
-                    content.html(html);
-                    return content;
+            // Toggle Avatar Upload Form
+            $('body').on('click', '.toggle-avatar-upload', function () {
+                var form = $(this).closest('.expert-avatar').find('.avatar-upload-form');
+                if (form.is(':visible')) {
+                    form.slideUp();
+                } else {
+                    form.slideDown();
                 }
             });
-            $('body').on('submit', '.file-uploader-form form', function () {
-                var form = $(this);
-                var parent = form.closest('div');
-                var args = {
-                    data: {
-                        parent_id: form.find('input[name="parent_id"]').first().val()
-                    },
-                    //processData: false,
-                    iframe: true,
-                    cache: false,
-                    type: 'POST',
-                    url: '<?php echo (add_query_arg(array('upload_file_nonce'=>wp_create_nonce('hn_upload_avatar')))) ?>'
-                };
-
-                var file = $(":file", form);
-
-                if (!file.val()) {
-                    alert(expert_form.avatar_empty);
-                } else {
-                    args.files = file;
-                    args.beforeSend = function () {
-                        parent.find('.alert').remove();
-                        form.find('button').attr('disabled', 'disabled');
-                    };
-                    args.success = function (data) {
-                        form.find(':input, button').removeAttr('disabled');
-                        var tmp = $(data);
-                        var url = tmp.text();
-                        $('.expert-avatar .panel-body').html('<img src="' + url + '"/>');
-                        $('.change-avatar').webuiPopover('hide');
-                        form.find('.hn-delete-avatar').removeClass('hide');
-                    }
-                    $.ajax(args);
-                }
-                return false;
-            })
+            
+            // File Validation
             $('body').on('change', '.hn_uploader_element', function (e) {
                 var file = e.target.files[0];
+                if (!file) return;
+                
                 var type = file.type.split('/');
                 var size_allowed = '<?php echo (get_max_file_upload() * 1000000) ?>';
+                
                 if (type[0] != 'image') {
                     alert(expert_form.avatar_error_file);
                     $(this).val("");
@@ -73,25 +58,72 @@
                     $(this).val("");
                 }
             });
-            $('body').on('click', '.hn-cancel-avatar', function () {
-                $('.change-avatar').webuiPopover('hide');
-            })
+            
+            // Form Submit - Trigger on button click instead of form submit
+            $('body').on('click', '.avatar-submit-btn', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                var btn = $(this);
+                var form = btn.closest('.file-uploader-form');
+                var parent = form.closest('.avatar-upload-form');
+                var file = form.find('input[name="hn_uploader_element"]');
 
-            $('body').on('click', '.hn-delete-avatar', function () {
+                if (!file.val()) {
+                    alert(expert_form.avatar_empty);
+                    return false;
+                }
+
+                // Create FormData from file input
+                var formData = new FormData();
+                // CRITICAL: Backend expects $_FILES['hn_uploader'], not 'hn_uploader_element'
+                formData.append('hn_uploader', file[0].files[0]);
+                formData.append('parent_id', form.find('input[name="parent_id"]').val());
+                
+                var nonce = '<?php echo wp_create_nonce('hn_upload_avatar'); ?>';
+                var uploadUrl = '<?php echo home_url(); ?>' + '?upload_file_nonce=' + encodeURIComponent(nonce);
+                
                 $.ajax({
+                    url: uploadUrl,
                     type: 'POST',
-                    data: {
-                        parent_id: '<?php echo $model->id ?>',
-                        action: 'expert_delete_avatar',
-                        _nonce: '<?php echo wp_create_nonce('expert_delete_avatar') ?>'
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    beforeSend: function () {
+                        parent.find('.alert').html('').hide();
+                        btn.attr('disabled', 'disabled').text('wird hochgeladen...');
                     },
                     success: function (data) {
-                        $('.expert-avatar .panel-body').html(data);
-                        $(this).addClass('hide');
-                        $('.change-avatar').webuiPopover('hide');
+                        btn.removeAttr('disabled').text('<?php _e("Hochladen", "psjb") ?>');
+                        console.log('Avatar Response:', data);
+                        
+                        // Check if response is a valid image URL
+                        if (data && (data.indexOf('http') === 0 || data.indexOf('/') === 0)) {
+                            // Update Avatar Image
+                            var avatarDiv = form.closest('.expert-avatar');
+                            avatarDiv.find('.panel-body').html('<img src="' + data.trim() + '" style="width: 100%; height: auto;">');
+                            // Reset Form
+                            file.val('');
+                            parent.slideUp();
+                        } else {
+                            parent.find('.alert').html('Fehler: ' + (data || 'Unbekannter Fehler')).show();
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        btn.removeAttr('disabled').text('<?php _e("Hochladen", "psjb") ?>');
+                        console.log('Avatar Error:', status, error, xhr.responseText);
+                        parent.find('.alert').html('Upload fehlgeschlagen: ' + (error || 'Bitte versuche es später erneut')).show();
                     }
-                })
-            })
-        })
+                });
+                
+                return false;
+            });
+            
+            // Cancel Button
+            $('body').on('click', '.cancel-avatar-upload', function () {
+                $(this).closest('.avatar-upload-form').slideUp();
+                $(this).closest('.file-uploader-form').find('input[name="hn_uploader_element"]').val('');
+            });
+        });
     </script>
 <?php endif; ?>

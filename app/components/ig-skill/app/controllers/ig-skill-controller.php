@@ -45,7 +45,7 @@ class IG_Skill_Controller extends IG_Request
         if (!wp_verify_nonce(ig_skill()->get('_wpnonce'), 'social_skill_form')) {
             return;
         }
-        $id = ig_social_wall()->get('id', 0);
+        $id = ig_skill()->get('id', 0);
         $model = IG_Skill_Model::model()->get_one($id, ig_skill()->get('parent_id', 0));
         if (!is_object($model)) {
             $model = null;

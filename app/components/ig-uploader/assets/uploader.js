@@ -1,123 +1,139 @@
 jQuery(function ($) {
     var file_port;
     var igu_uploader;
-    $('body').on('mouseenter', '.add-file', function () {
+    
+    // Formular inline laden (Hinzufügen)
+    $('body').on('click', '.add-file', function () {
         var key = 'igu_uploader_' + $(this).parent().parent().parent().attr('id');
         igu_uploader = window[key];
-        $(this).webuiPopover({
-            type: 'async',
-            width: 'auto',
-            height: 'auto',
-            title: igu_uploader.title,
-            url: igu_uploader.add_url,
-            content: function (data) {
-                return data;
-            }
-        }).on('show.webui.popover', function () {
-            var that = $(this);
-            var pop = that.data('plugin_webuiPopover');
-            var container = pop.$target;
-            var form = container.find('form').first();
-            if (form.length > 0) {
-                $('body').on('click', '.igu-close-uploader', function () {
-                    pop.destroy();
-                });
-            }
-            igu_uploader.instance = that;
-            file_port = that.parent().parent().find('.file-view-port');
-        })
-    });
-    $('body').on('mouseenter', '.igu-file-update', function () {
-        var key = 'igu_uploader_' + $(this).closest('section').parent().parent().attr('id');
-        igu_uploader = window[key];
-        $(this).webuiPopover({
-            type: 'async',
-            width: 'auto',
-            height: 'auto',
-            title: igu_uploader.title,
-            url: igu_uploader.edit_url + $(this).data('id'),
-            content: function (data) {
-                return data;
-            }
-        }).on('show.webui.popover', function () {
-            var that = $(this);
-            var pop = that.data('plugin_webuiPopover');
-            var container = pop.$target;
-            var form = container.find('form').first();
-            if (form.length > 0) {
-                $('body').on('click', '.igu-close-uploader', function () {
-                    pop.destroy();
-                });
-            }
-            igu_uploader.instance = that;
-            file_port = that.closest('section');
-        });
-    })
-    var file_frame;
-    $('body').on('click', '.upload_image_button', function () {
-        if (file_frame) {
-            // Open frame
-            file_frame.open();
+        var container = $(this).closest('section').find('.uploader-form-container');
+        
+        if (container.is(':visible')) {
+            container.slideUp().html('');
             return;
         }
-
-        // Create the media frame.
-        file_frame = wp.media.frames.file_frame = wp.media({
-            title: igu_uploader.file_frame_title,
-            multiple: false  // Set to true to allow multiple files to be selected
-        });
-
-        // When an image is selected, run a callback.
-        file_frame.on('select', function () {
-            // We set multiple to false so only get one image from the uploader
-            attachment = file_frame.state().get('selection').first().toJSON();
-            // Do something with attachment.id and/or attachment.url here
-            $('#attachment').first().val(attachment.id);
-            
-            $('.file-upload-name').first().text(attachment.filename);
-            if( $( '.file-upload-name' ).closest( '.webui-popover' ).length ) {
-                //console.log( $( '.file-upload-name' ).closest( '.webui-popover' ).html() );
-                //$( '.file-upload-name' ).closest( '.webui-popover' ).show();
-                //$('.add-file').click();
+        
+        $.ajax({
+            url: igu_uploader.add_url,
+            success: function(data) {
+                container.html(data).slideDown();
+                file_port = $(this).closest('section').find('.file-view-port');
             }
         });
-
-        file_frame.on('open', function () {
-            file_frame.uploader.uploader.param("igu_uploading", "1");
-        });
-
-        // Finally, open the modal
-        file_frame.open();
     });
-    $('body').on('submit', '.igu-upload-form', function () {
+    
+    // Datei bearbeiten
+    $('body').on('click', '.igu-file-update', function () {
+        var key = 'igu_uploader_' + $(this).closest('section').parent().parent().attr('id');
+        igu_uploader = window[key];
+        var container = $(this).closest('section').find('.uploader-form-container');
+        var fileId = $(this).data('id');
+        
+        if (container.is(':visible')) {
+            container.slideUp().html('');
+            return;
+        }
+        
+        $.ajax({
+            url: igu_uploader.edit_url + fileId,
+            success: function(data) {
+                container.html(data).slideDown();
+                file_port = $(this).closest('section').find('.file-view-port');
+            }
+        });
+    });
+    
+    // Uploader Submit Button Click Handler
+    $('body').on('click', '.igu-submit-uploader', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $('.uploader-form-container .igu-upload-form').trigger('igu-upload-submit');
+    });
+    
+    $('body').on('igu-upload-submit', '.igu-upload-form', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
         var that = $(this);
-        $.ajax(igu_uploader.form_submit_url, {
+        var section = that.closest('section');
+        var container = section.find('.uploader-form-container');
+        var fileInput = that.find('input[name="portfolio_file"]')[0];
+        
+        // Find igu_uploader config
+        var sectionId = section.attr('id');
+        var igu_uploader_config = null;
+        if (sectionId) {
+            igu_uploader_config = window['igu_uploader_' + sectionId];
+        }
+        
+        if (!igu_uploader_config) {
+            for (var key in window) {
+                if (key.indexOf('igu_uploader_') === 0 && typeof window[key] === 'object') {
+                    igu_uploader_config = window[key];
+                    break;
+                }
+            }
+        }
+        
+        if (!igu_uploader_config) {
+            alert('Fehler: Uploader-Konfiguration nicht gefunden.');
+            return false;
+        }
+        
+        // Create FormData with file upload
+        var formData = new FormData();
+        
+        // Add file if selected
+        if (fileInput && fileInput.files && fileInput.files.length > 0) {
+            formData.append('portfolio_file', fileInput.files[0]);
+        }
+        
+        // Add other form fields
+        that.find(':input:not([type="file"])').each(function() {
+            var name = $(this).attr('name');
+            var value = $(this).val();
+            if (name && value) {
+                formData.append(name, value);
+            }
+        });
+        
+        $.ajax(igu_uploader_config.form_submit_url, {
             type: 'POST',
-            data: $(this).find(':input').serialize(),
+            data: formData,
             processData: false,
+            contentType: false,
             beforeSend: function () {
                 that.find('button').attr('disabled', 'disabled');
             },
             success: function (data) {
-                //data = $.parseJSON(data);
                 that.find('button').removeAttr('disabled');
+                
+                // Parse data if it's a string
+                if (typeof data === 'string') {
+                    try {
+                        data = JSON.parse(data);
+                    } catch(e) {
+                        alert('Fehler beim Hochladen der Datei.');
+                        return;
+                    }
+                }
+                
                 if (data.status == 'success') {
-                    //check case update or case insert
-                    if (igu_uploader.instance.hasClass('add-file') == false) {
+                    var file_view_port = section.find('.file-view-port');
+                    
+                    // Prüfe ob Update oder Insert
+                    var existingFile = $('#igu-media-file-' + data.id);
+                    if (existingFile.length > 0) {
+                        // Update
                         var html = $(data.html);
-                        igu_uploader.instance.webuiPopover('destroy');
-                        $('#igu-media-file-' + data.id).html(html.html());
+                        existingFile.html(html.html());
                     } else {
-                        var file_view_port = file_port;
+                        // Insert
                         var att = $(data.html);
                         att.css('display', 'none');
-
                         file_view_port.find('.no-file').remove();
                         file_view_port.prepend(att);
-                        att.css('display', 'none');
-
-                        file_view_port.find('.no-file').remove();
-                        file_view_port.prepend(att);
+                        
                         if (file_view_port.width() <= (180 * 3)) {
                             att.css('width', '49%');
                         }
@@ -125,12 +141,17 @@ jQuery(function ($) {
                             att.css('width', '25%');
                         }
                         att.css('display', 'block');
-                        var input = file_view_port.closest('form').find('#' + igu_uploader.target_id);
-                        input.val(input.val() + ',' + data.id);
-                        that.find(':input:not([type=hidden])').val('');
-                        igu_uploader.instance.webuiPopover('destroy');
+                        
+                        // Find portfolios hidden input in main form
+                        var input = $('input[name="portfolios"]');
+                        var currentVal = input.val() || '';
+                        input.val((currentVal ? currentVal + ',' : '') + data.id);
                     }
+                    
+                    that.find(':input:not([type=hidden])').val('');
+                    container.slideUp().html('');
                 } else {
+                    // Fehlerbehandlung
                     that.find('.form-group').removeClass('has-error has-success');
                     $.each(data.errors, function (i, v) {
                         var element = that.find('.error-' + i);
@@ -144,17 +165,28 @@ jQuery(function ($) {
                         }
                     });
                 }
+            },
+            error: function(xhr, status, error) {
+                that.find('button').removeAttr('disabled');
+                alert('Fehler beim Hochladen: ' + (error || 'Unbekannter Fehler'));
             }
-        })
+        });
         return false;
     });
+    
+    $('body').on('click', '.igu-close-uploader', function () {
+        $(this).closest('section').find('.uploader-form-container').slideUp().html('');
+    });
+    
     $('body').on('click', '.igu-file-delete', function (e) {
         e.preventDefault();
-        var key = 'igu_uploader_' + $(this).closest('section').parent().parent().attr('id');
+        var section = $(this).closest('section');
+        var key = 'igu_uploader_' + section.parent().parent().attr('id');
         igu_uploader = window[key];
         var id = $(this).data('id');
         var that = $(this);
         var parent = $('#igu-media-file-' + id);
+        
         $.ajax({
             type: 'POST',
             url: igu_uploader.ajax_url,
@@ -164,8 +196,6 @@ jQuery(function ($) {
                 _wpnonce: igu_uploader.delete_nonce
             },
             beforeSend: function () {
-                /* that.parent().parent().find('button').attr('disabled', 'disabled');
-                 that.parent().parent().css('opacity', 0.5);*/
                 parent.find('button').attr('disabled', 'disabled');
                 parent.css('opacity', 0.5);
             },
@@ -176,6 +206,7 @@ jQuery(function ($) {
             }
         })
     });
+    
     $('.file-view-port').each(function () {
         if ($(this).width() >= (180 * 4)) {
             $(this).find('.igu-media-file-land').css('width', '25%');
@@ -184,12 +215,4 @@ jQuery(function ($) {
             $(this).find('.igu-media-file-land').css('width', '49%');
         }
     })
-    window.addEventListener('scroll', function () {
-        if (igu_uploader != undefined && igu_uploader.instance != undefined && typeof igu_uploader.instance == 'object') {
-            var pop = igu_uploader.instance.data('plugin_webuiPopover');
-            if (pop!=undefined && pop.$target.is(':visible')) {
-                igu_uploader.instance.webuiPopover('reposition');
-            }
-        }
-    });
-})
+});

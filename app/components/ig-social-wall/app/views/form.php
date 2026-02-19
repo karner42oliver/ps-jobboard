@@ -3,7 +3,7 @@
 		<div class="alert alert-danger hide">
 		</div>
 		<div class="row">
-			<form method="post" class="social-form">
+			<div class="social-form">
 				<div class="col-md-4 hidden-xs hidden-sm">
 					<div class="social-preview">
 						<?php if ( is_object( $model ) ): ?>
@@ -30,7 +30,7 @@
 						class="note"><?php _e( 'Soziale Informationen (URL oder Benutzername)', ig_skill()->domain ) ?></label>
 					<input type="text" name="value" value="<?php echo is_object( $model ) ? $model->value : null ?>">
 					<button class="btn btn-primary btn-sm hn-save-social"
-					        type="submit"><?php _e( 'Übermitteln', ig_skill()->domain ) ?></button>
+					        type="button"><?php _e( 'Übermitteln', ig_skill()->domain ) ?></button>
 					&nbsp;
 					<button class="btn btn-default btn-sm hn-cancel-social"
 					        type="button"><?php _e( 'Abbrechen', ig_skill()->domain ) ?></button>
@@ -42,7 +42,7 @@
 
 				</div>
 				<div class="clearfix"></div>
-			</form>
+			</div>
 		</div>
 	</div>
 	<div class="ig-overlay hide"

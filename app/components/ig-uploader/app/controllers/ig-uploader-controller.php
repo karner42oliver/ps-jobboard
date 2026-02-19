@@ -77,22 +77,37 @@ if (!class_exists('IG_Uploader_Controller')) {
                     return;
                 }
                 $model = '';
-                $id = ig_uploader()->post('IG_Uploader_Model[id]', 0);
+                $id = ig_uploader()->post('id', 0);
                 if ($id != 0) {
                     $model = IG_Uploader_Model::model()->find($id);
                 }
                 if (!is_object($model)) {
                     $model = new IG_Uploader_Model();
                 }
-                $model->import(ig_uploader()->post('IG_Uploader_Model'));
-                if (!is_admin()) {
-                    if (isset($_FILES['IG_Uploader_Model'])) {
-                        $uploaded = $this->rearrange($_FILES['IG_Uploader_Model']);
-                        if (!empty($uploaded['file']['name'])) {
-                            $model->file_upload = $uploaded;
-                        }
+                
+                // Handle direct file upload from device
+                if (isset($_FILES['portfolio_file']) && !empty($_FILES['portfolio_file']['name'])) {
+                    if (!function_exists('wp_handle_upload')) {
+                        require_once(ABSPATH . 'wp-admin/includes/file.php');
+                    }
+                    $upload_overrides = array('test_form' => false);
+                    $movefile = wp_handle_upload($_FILES['portfolio_file'], $upload_overrides);
+                    
+                    if ($movefile && !isset($movefile['error'])) {
+                        $model->file = $movefile['url'];
+                    } else {
+                        wp_send_json(array(
+                            'status' => 'fail',
+                            'errors' => array('file' => array($movefile['error']))
+                        ));
+                        exit;
                     }
                 }
+                
+                // Set other fields
+                $model->url = ig_uploader()->post('url', '');
+                $model->content = ig_uploader()->post('content', '');
+                
                 if ($model->validate()) {
                     $model->save();
                     wp_send_json(array(

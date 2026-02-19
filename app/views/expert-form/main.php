@@ -215,68 +215,37 @@
                                                     'apply_source_formatting' => true
                                                 )
                                             ));
-                                            
-                                            $placeholder_text = esc_js(__('Erzähle uns von dir...', 'psjb'));
                                             ?>
                                             <script type="text/javascript">
-                                            (function() {
-                                                var placeholderText = '<?php echo $placeholder_text; ?>';
-                                                var biographyHasContent = <?php echo !empty($model->biography) ? 'true' : 'false'; ?>;
+                                            jQuery(document).ready(function($) {
+                                                // NUR das Textarea verstecken
+                                                $('textarea#biography').hide().css({'display': 'none', 'visibility': 'hidden', 'opacity': 0});
                                                 
-                                                jQuery(document).ready(function($) {
-                                                    // NUR das Textarea verstecken, nicht das gesamte DIV!
-                                                    $('textarea#biography').hide().css({'display': 'none', 'visibility': 'hidden', 'opacity': 0});
-                                                    
-                                                    // TinyMCE initialisieren NACHDEM alles geladen ist
-                                                    if (typeof tinymce !== 'undefined') {
-                                                        var checkEditor = setInterval(function() {
-                                                            var editor = tinymce.get('biography');
-                                                            if (editor) {
-                                                                clearInterval(checkEditor);
-                                                                
-                                                                // Textarea nochmal verstecken nach Editor-Init
-                                                                $('textarea#biography').hide().css({'display': 'none !important'});
-                                                                
-                                                                // Placeholder bei leerem Editor
-                                                                if (!biographyHasContent && editor.getContent() === '') {
-                                                                    editor.setContent('<p style="color: #999;">' + placeholderText + '</p>');
-                                                                }
-                                                                
-                                                                // Focus Event
-                                                                editor.on('focus', function() {
-                                                                    var content = this.getContent();
-                                                                    if (content.indexOf('color: #999') > -1 && content.indexOf(placeholderText) > -1) {
-                                                                        this.setContent('');
-                                                                    }
-                                                                });
-                                                                
-                                                                // Blur Event
-                                                                editor.on('blur', function() {
-                                                                    var content = this.getContent().trim();
-                                                                    if (content === '' || content === '<p></p>' || content === '<p><br></p>') {
-                                                                        this.setContent('<p style="color: #999;">' + placeholderText + '</p>');
-                                                                    }
-                                                                });
+                                                // TinyMCE: Content aus Textarea holen und explizit setzen
+                                                if (typeof tinymce !== 'undefined') {
+                                                    var checkEditor = setInterval(function() {
+                                                        var editor = tinymce.get('biography');
+                                                        if (editor) {
+                                                            clearInterval(checkEditor);
+                                                            
+                                                            // Content aus dem versteckten Textarea holen
+                                                            var textareaContent = $('textarea#biography').val();
+                                                            
+                                                            // Nur setzen wenn Textarea nicht leer ist
+                                                            if (textareaContent && textareaContent.trim() !== '') {
+                                                                editor.setContent(textareaContent);
                                                             }
-                                                        }, 100);
-                                                    }
-                                                    
-                                                    // Form Submit Handler
-                                                    $('.je-expert-submit').on('click', function(e) {
-                                                        if (typeof tinyMCE !== 'undefined') {
-                                                            var editor = tinyMCE.get('biography');
-                                                            if (editor) {
-                                                                var content = editor.getContent();
-                                                                // Placeholder-Text entfernen
-                                                                if (content.indexOf('color: #999') > -1 && content.indexOf(placeholderText) > -1) {
-                                                                    editor.setContent('');
-                                                                }
-                                                            }
-                                                            tinyMCE.triggerSave();
                                                         }
-                                                    });
+                                                    }, 100);
+                                                }
+                                                
+                                                // TinyMCE Save vor Submit
+                                                $('.je-expert-submit').on('click', function(e) {
+                                                    if (typeof tinyMCE !== 'undefined') {
+                                                        tinyMCE.triggerSave();
+                                                    }
                                                 });
-                                            })();
+                                            });
                                             </script>
                                             <?php
                                         } else {
@@ -336,21 +305,21 @@
                     $form->hidden('social', array('attributes' => array('id' => 'social-input')));
                     $form->hidden('skills', array('attributes' => array('id' => 'skill-input')));
                     $form->hidden('portfolios');
-                    echo wp_nonce_field('jbp_add_pro');
+                    wp_nonce_field('jbp_add_pro', '_wpnonce', true, true);
                     ?>
 
                     <?php if (je()->settings()->expert_new_expert_status == 'publish'): ?>
-                        <button class="submit btn btn-small btn-primary je-expert-submit" name="status" value="publish" type="submit">
+                        <button class="submit btn btn-small btn-primary je-expert-submit" name="status" value="publish" type="button">
                             <?php _e('Veröffentlichen', 'psjb') ?>
                         </button>
                     <?php else: ?>
-                        <button class="submit btn btn-small btn-primary je-expert-submit" name="status" value="pending" type="submit">
+                        <button class="submit btn btn-small btn-primary je-expert-submit" name="status" value="pending" type="button">
                             <?php _e('Zur Überprüfung einreichen', 'psjb') ?>
                         </button>
                     <?php endif; ?>
 
                     <?php if (je()->settings()->expert_allow_draft == 1): ?>
-                        <button class="submit btn btn-small btn-info je-expert-submit" name="status" value="draft" type="submit">
+                        <button class="submit btn btn-small btn-info je-expert-submit" name="status" value="draft" type="button">
                             <?php _e('Entwurf speichern', 'psjb') ?>
                         </button>
                     <?php endif; ?>
@@ -384,16 +353,127 @@
             });
         }
 
-        // Initialize form validation
-        $(".form-horizontal").validationEngine('attach', {
-            promptPosition: 'topLeft',
-            scroll: true,
-            autoHidePrompt: true
-        });
+        // Manual form validation and submission - NO ValidationEngine auto attach
+        var form = $(".form-horizontal");
 
-        // Handle form submission
-        $('.je-expert-submit').on('click', function () {
-            $(this).addClass('disabled').text('<?php echo esc_js(__("wird verarbeitet...")) ?>');
+        // Handle button clicks
+        $('.je-expert-submit').on('click', function (e) {
+            e.preventDefault();
+            var button = $(this);
+            var status = button.attr('value'); // 'draft', 'pending', or 'publish'
+            
+            // Bei "Entwurf speichern" KEINE Validierung - direkt speichern
+            if (status === 'draft') {
+                submitExpertForm(form, status, button);
+            } else {
+                // Bei "Veröffentlichen" oder "Zur Überprüfung": Validieren MANUELL nur die wichtigsten Felder
+                var validationPassed = validateMainFormFields(form);
+                if (validationPassed) {
+                    submitExpertForm(form, status, button);
+                }
+            }
         });
+        
+        // MANUAL VALIDATION - only check required main form fields, NOT inline forms
+        function validateMainFormFields(form) {
+            var isValid = true;
+            var errors = [];
+            
+            // Check biography field (TinyMCE)
+            if (typeof tinyMCE !== 'undefined') {
+                var bioEditor = tinyMCE.get('expert_biography');
+                if (bioEditor) {
+                    var bioContent = bioEditor.getContent().trim();
+                    // Entferne HTML Tags um reine Text-Länge zu prüfen
+                    var plainText = bioContent.replace(/<[^>]*>/g, '').trim();
+                    if (plainText.length === 0) {
+                        errors.push('<?php echo esc_js(__("Die Biografie ist erforderlich")) ?>');
+                        isValid = false;
+                    } else if (plainText.length < 200) {
+                        errors.push('<?php echo esc_js(__("Die Biografie muss mindestens 200 Zeichen lang sein")) ?>');
+                        isValid = false;
+                    }
+                }
+            }
+            
+            // Check other required fields with validate[required] class
+            // Filter out fields in inline containers by checking they're direct children of form
+            form.find('input[class*="validate[required]"], textarea[class*="validate[required]"], select[class*="validate[required]"]').each(function() {
+                // Skip if this field is inside an inline form container
+                if ($(this).closest('.skill-form-container, .social-form-container, .avatar-upload-form, .uploader-form-container').length > 0) {
+                    return; // Skip this field
+                }
+                
+                var field = $(this);
+                var value = field.val().trim();
+                if (value === '') {
+                    var label = field.closest('.row').find('label').first().text() || field.attr('placeholder');
+                    errors.push(label + ' <?php echo esc_js(__("ist erforderlich")) ?>');
+                    isValid = false;
+                }
+            });
+            
+            if (!isValid) {
+                alert(errors.join('\n'));
+            }
+            
+            return isValid;
+        }
+        
+        function submitExpertForm(form, status, button) {
+            var originalButtonText = button.text();
+            button.addClass('disabled').text('<?php echo esc_js(__("wird verarbeitet...")) ?>');
+            
+            var formData = form.serialize() + '&status=' + status;
+            
+            $.ajax({
+                type: 'POST',
+                url: form.attr('action') || window.location.href,
+                data: formData,
+                beforeSend: function() {
+                    // TinyMCE-Content vor Submit speichern
+                    if (typeof tinyMCE !== 'undefined') {
+                        tinyMCE.triggerSave();
+                    }
+                },
+                success: function(response) {
+                    
+                    // Parse response if it's a string
+                    var data = response;
+                    if (typeof response === 'string') {
+                        try {
+                            data = JSON.parse(response);
+                        } catch(e) {
+                            data = null;
+                        }
+                    }
+                    
+                    // Check if we got a success response
+                    if (data && data.success === true) {
+                        if (status === 'draft') {
+                            button.removeClass('disabled').text(originalButtonText);
+                            // Kein Alert - Form bleibt erhalten
+                        } else {
+                            // Redirect to the URL from response
+                            if (data.data && data.data.redirect_url) {
+                                window.location.href = data.data.redirect_url;
+                            } else {
+                                window.location.reload();
+                            }
+                        }
+                    } else if (data && data.success === false) {
+                        button.removeClass('disabled').text(originalButtonText);
+                        alert('<?php echo esc_js(__("Validierung fehlgeschlagen. Bitte überprüfen Sie Ihre Eingaben.")) ?>');
+                    } else {
+                        // Fallback für non-JSON responses
+                        window.location.reload();
+                    }
+                },
+                error: function(xhr, status, error) {
+                    button.removeClass('disabled').text(originalButtonText);
+                    alert('<?php echo esc_js(__("Es gab einen Fehler beim Speichern. Bitte versuchen Sie es erneut.")) ?>');
+                }
+            });
+        }
     });
 </script>
