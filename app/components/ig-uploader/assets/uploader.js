@@ -119,10 +119,12 @@ jQuery(function ($) {
                 }
                 
                 if (data.status == 'success') {
-                    var file_view_port = section.find('.file-view-port');
+                    // Find file-view-port - could be the section itself or a child
+                    var file_view_port = section.hasClass('file-view-port') ? section : section.find('.file-view-port');
                     
                     // Prüfe ob Update oder Insert
                     var existingFile = $('#igu-media-file-' + data.id);
+                    
                     if (existingFile.length > 0) {
                         // Update
                         var html = $(data.html);
@@ -142,10 +144,14 @@ jQuery(function ($) {
                         }
                         att.css('display', 'block');
                         
-                        // Find portfolios hidden input in main form
-                        var input = $('input[name="portfolios"]');
+                        // Find portfolios hidden input in main form (IG_Active_Form uses array-style names)
+                        var input = $('input[name="portfolios"], input[name$="[portfolios]"]');
+                        console.log('[PORTFOLIO] Found hidden input:', input.length);
+                        console.log('[PORTFOLIO] Current value:', input.val());
                         var currentVal = input.val() || '';
-                        input.val((currentVal ? currentVal + ',' : '') + data.id);
+                        var newVal = (currentVal ? currentVal + ',' : '') + data.id;
+                        input.val(newVal);
+                        console.log('[PORTFOLIO] New value:', newVal);
                     }
                     
                     that.find(':input:not([type=hidden])').val('');

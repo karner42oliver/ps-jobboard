@@ -223,18 +223,28 @@
                                                 
                                                 // TinyMCE: Content aus Textarea holen und explizit setzen
                                                 if (typeof tinymce !== 'undefined') {
+                                                    var attempts = 0;
                                                     var checkEditor = setInterval(function() {
+                                                        attempts++;
                                                         var editor = tinymce.get('biography');
                                                         if (editor) {
                                                             clearInterval(checkEditor);
                                                             
-                                                            // Content aus dem versteckten Textarea holen
-                                                            var textareaContent = $('textarea#biography').val();
-                                                            
-                                                            // Nur setzen wenn Textarea nicht leer ist
-                                                            if (textareaContent && textareaContent.trim() !== '') {
-                                                                editor.setContent(textareaContent);
-                                                            }
+                                                            // Kurz warten bis Editor voll initialisiert ist
+                                                            setTimeout(function() {
+                                                                // Content aus dem versteckten Textarea holen
+                                                                var textareaContent = $('textarea#biography').val();
+                                                                
+                                                                // Nur setzen wenn Textarea nicht leer ist
+                                                                if (textareaContent && textareaContent.trim() !== '') {
+                                                                    editor.setContent(textareaContent);
+                                                                }
+                                                            }, 200);
+                                                        }
+                                                        
+                                                        // Abbruch nach 50 Versuchen (5 Sekunden)
+                                                        if (attempts > 50) {
+                                                            clearInterval(checkEditor);
                                                         }
                                                     }, 100);
                                                 }
@@ -463,7 +473,18 @@
                         }
                     } else if (data && data.success === false) {
                         button.removeClass('disabled').text(originalButtonText);
-                        alert('<?php echo esc_js(__("Validierung fehlgeschlagen. Bitte überprüfen Sie Ihre Eingaben.")) ?>');
+                        
+                        // Zeige Fehler im Alert
+                        var errorMsg = '<?php echo esc_js(__("Validierung fehlgeschlagen. Bitte überprüfen Sie Ihre Eingaben.")) ?>';
+                        if (data.data && data.data.errors) {
+                            errorMsg += '\n\nFehler:\n';
+                            for (var field in data.data.errors) {
+                                if (data.data.errors[field]) {
+                                    errorMsg += '- ' + field + ': ' + data.data.errors[field].join(', ') + '\n';
+                                }
+                            }
+                        }
+                        alert(errorMsg);
                     } else {
                         // Fallback für non-JSON responses
                         window.location.reload();

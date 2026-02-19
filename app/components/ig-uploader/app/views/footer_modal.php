@@ -12,18 +12,20 @@
                         //check does this file exist
 
                         $file_url = '';
-                        $show_image = false;
-
-                        if ($file) {
-                            $file_url = wp_get_attachment_url($file);
-                            $mime = explode('/', get_post_mime_type($file));
-                            if (array_shift($mime) == 'image') {
-                                $show_image = true;
+                        if ( $file ) {
+                            if ( filter_var( $file, FILTER_VALIDATE_INT ) ) {
+                                $file_url = wp_get_attachment_url( $file );
+                            } else {
+                                $file_url = $file;
                             }
                         }
-                        if ($show_image) {
-                            echo '<img src="' . $file_url . '"/>';
-                        } elseif ($file) {
+                        $file_type = $file_url ? wp_check_filetype( $file_url ) : array();
+                        $mime_type = ! empty( $file_type['type'] ) ? $file_type['type'] : '';
+                        $show_image = ( strpos( $mime_type, 'image/' ) === 0 );
+
+                        if ( $show_image && $file_url ) {
+                            echo '<img src="' . esc_url( $file_url ) . '" style="max-width:100%;height:auto;display:block;" />';
+                        } elseif ( $file_url ) {
                             //show meta
                             ?>
                             <ul class="list-group">
@@ -31,20 +33,24 @@
                                     <i class="glyphicon glyphicon-floppy-disk"></i>
                                     <?php _e('Größe', 'psjb') ?>:
                                     <strong><?php
-                                        $tfile = get_attached_file($file);
-                                        //check does this files has deleted
-                                        if ($tfile) {
-                                            $f = filesize(get_attached_file($file));
-                                            echo $f;
-                                        } else {
-                                            echo __("N/A", 'psjb');
+                                        $file_size = '';
+                                        if ( $file_url ) {
+                                            $uploads = wp_upload_dir();
+                                            if ( strpos( $file_url, $uploads['baseurl'] ) === 0 ) {
+                                                $relative = str_replace( $uploads['baseurl'], '', $file_url );
+                                                $path = $uploads['basedir'] . $relative;
+                                                if ( file_exists( $path ) ) {
+                                                    $file_size = size_format( filesize( $path ) );
+                                                }
+                                            }
                                         }
+                                        echo $file_size ? $file_size : __("N/A", 'psjb');
                                         ?></strong>
                                 </li>
                                 <li class="list-group-item upload-item">
                                     <i class="glyphicon glyphicon-file"></i>
                                     <?php _e('Typ', 'psjb') ?>:
-                                    <strong><?php echo ucwords(get_post_mime_type($file)) ?></strong>
+                                    <strong><?php echo $mime_type ? esc_html( $mime_type ) : __("N/A", 'psjb'); ?></strong>
                                 </li>
                             </ul>
                         <?php
@@ -59,7 +65,12 @@
                                 <div class="clearfix"></div>
                             </ul>
                         <?php
-                        }?>
+                        }
+
+                        if ( ! empty( $model->content ) ) {
+                            echo '<p class="text-muted" style="margin-top:10px;">' . esc_html( $model->content ) . '</p>';
+                        }
+                        ?>
                     </div>
                     <div class="modal-footer">
                         <?php if ($model->url): ?>
@@ -68,8 +79,8 @@
                                 <?php _e("Link aufrufen", 'psjb') ?>
                             </a>
                         <?php endif; ?>
-                        <?php if ($model->file): ?>
-                            <a href="<?php echo $file_url ?>" download
+                        <?php if ($file_url): ?>
+                            <a href="<?php echo esc_url( $file_url ); ?>" download
                                class="btn btn-info"><?php _e('Dateidownload', 'psjb') ?></a>
                         <?php endif; ?>
                         <button type="button" class="btn btn-default attachment-close" data-dismiss="modal">Schliessen

@@ -72,6 +72,11 @@ class JE_Expert_Form_Shortcode_Controller extends IG_Request {
 			// Bei Draft KEINE Validierung - direkt speichern!
 			$should_validate = ($model->status !== 'draft' && $model->status !== 'je-draft');
 			
+			error_log('[PUBLISH] Status: ' . $model->status);
+			error_log('[PUBLISH] Should validate: ' . ($should_validate ? 'YES' : 'NO'));
+			error_log('[PUBLISH] Biography length: ' . strlen($model->biography));
+			error_log('[PUBLISH] Biography content: ' . substr($model->biography, 0, 100));
+			
 			if (!$should_validate || $model->validate()) {
 				do_action( 'je_expert_saving_process', $model );
 				$model->save();
@@ -95,6 +100,9 @@ class JE_Expert_Form_Shortcode_Controller extends IG_Request {
 				}
 			} else {
 				// Validation failed
+				error_log('[PUBLISH] VALIDATION FAILED!');
+				error_log('[PUBLISH] Errors: ' . print_r($model->get_errors(), true));
+				
 				if ( ! empty( $_SERVER['HTTP_X_REQUESTED_WITH'] ) && strtolower( $_SERVER['HTTP_X_REQUESTED_WITH'] ) == 'xmlhttprequest' ) {
 					wp_send_json_error( array(
 						'errors' => $model->get_errors()

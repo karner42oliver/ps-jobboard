@@ -113,13 +113,21 @@ if ( ! class_exists( 'IG_Uploader_Model' ) ) {
 			}
 			$this->post_status = 'publish';
 
-			if ( is_array( $this->file_upload ) && isset( $this->file_upload['file']['name'] ) && ! empty( $this->file_upload['file']['name'] ) ) {
-				$this->name = $this->file_upload['file']['name'];
-			} elseif ( filter_var( $this->file, FILTER_VALIDATE_INT ) ) {
-				//id passed
-				$this->name = pathinfo( wp_get_attachment_url( $this->file ), PATHINFO_BASENAME );
-			} else {
-				$this->name = __( 'Link', ig_uploader()->domain );
+			if ( empty( $this->name ) ) {
+				if ( is_array( $this->file_upload ) && isset( $this->file_upload['file']['name'] ) && ! empty( $this->file_upload['file']['name'] ) ) {
+					$this->name = $this->file_upload['file']['name'];
+				} elseif ( ! empty( $this->file ) ) {
+					if ( filter_var( $this->file, FILTER_VALIDATE_INT ) ) {
+						//id passed
+						$this->name = pathinfo( wp_get_attachment_url( $this->file ), PATHINFO_BASENAME );
+					} else {
+						$this->name = pathinfo( $this->file, PATHINFO_BASENAME );
+					}
+				} elseif ( ! empty( $this->url ) ) {
+					$this->name = __( 'Link', ig_uploader()->domain );
+				} else {
+					$this->name = __( 'Datei', ig_uploader()->domain );
+				}
 			}
 		}
 

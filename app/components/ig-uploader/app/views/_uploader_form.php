@@ -28,6 +28,13 @@
 
         <div class="clearfix"></div>
     </div>
+    <div style="margin-bottom: 0" class="form-group <?php echo $model->has_error("title") ? "has-error" : null ?>">
+        <label class="control-label hidden-xs hidden-sm"><?php _e("Titel", ig_uploader()->domain) ?></label>
+        <input type="text" name="title" class="form-control input-sm" placeholder="<?php _e("Titel", ig_uploader()->domain) ?>" value="<?php echo $model->exist ? $model->name : ''; ?>">
+        <span class="help-block m-b-none error-title"></span>
+
+        <div class="clearfix"></div>
+    </div>
     <div style="margin-bottom: 0" class="form-group <?php echo $model->has_error("content") ? "has-error" : null ?>">
         <label class="control-label hidden-xs hidden-sm"><?php _e("Beschreibung", ig_uploader()->domain) ?></label>
         <textarea name="content" class="form-control input-sm" style="height:80px" placeholder="<?php _e("Beschreibung", ig_uploader()->domain) ?>"><?php echo $model->exist ? $model->content : ''; ?></textarea>

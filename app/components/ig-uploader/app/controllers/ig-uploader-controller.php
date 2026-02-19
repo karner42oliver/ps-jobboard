@@ -95,6 +95,9 @@ if (!class_exists('IG_Uploader_Controller')) {
                     
                     if ($movefile && !isset($movefile['error'])) {
                         $model->file = $movefile['url'];
+                        if (empty($model->name)) {
+                            $model->name = sanitize_text_field($_FILES['portfolio_file']['name']);
+                        }
                     } else {
                         wp_send_json(array(
                             'status' => 'fail',
@@ -107,6 +110,10 @@ if (!class_exists('IG_Uploader_Controller')) {
                 // Set other fields
                 $model->url = ig_uploader()->post('url', '');
                 $model->content = ig_uploader()->post('content', '');
+                $title = ig_uploader()->post('title', '');
+                if (!empty($title)) {
+                    $model->name = $title;
+                }
                 
                 if ($model->validate()) {
                     $model->save();
