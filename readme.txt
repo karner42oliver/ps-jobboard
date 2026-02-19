@@ -27,23 +27,5 @@ Und erweitere die Möglichkeiten von PS Jobboard um weitere Funktionen, so kanns
 
 = 1.0.0 =
 
-* Fix: Incomplete string escaping or encoding
+* Release
 
-= 1.2.3 =
-
-* Textanpassungen
-* Select2 Update
-* Deprecated jQuery Updates
-* Startseite Auszugslänge und Titellänge korrigiert
-* PHP Deprecated:  Required parameter
-
-= 1.2.2 =
-
-* +Psource Updater v.1.1
-* Textanpassungen
-* CSS Styles angepasst
-
-= 1.2.1 =
-
-* Overhauled von PSOURCE
-* Release PSOURCE Netzwerksuche
