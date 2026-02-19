@@ -68,7 +68,7 @@ class MM_Group_Conversation
                 $name = $user->user_login;
             }
             ?>
-            <span class="label label-default"><?php echo $name ?>
+            <span class="label label-default"><?php echo esc_html($name); ?>
                 <?php if ($conversation->send_from == get_current_user_id()): ?>
                     <a data-id="<?php echo $conversation->id ?>" data-user="<?php echo esc_attr($user->user_login) ?>"
                        class="mm-drop-user" href="#"><span
@@ -296,7 +296,7 @@ class MM_Group_Conversation
                 $('body').on('click', '.mm-drop-user', function (e) {
                         e.preventDefault();
                         var that = $(this);
-                        if (confirm('<?php echo $text ?>')) {
+                        if (confirm('<?php echo esc_js($text); ?>')) {
                             $.ajax({
                                 type: 'POST',
                                 url: '<?php echo admin_url('admin-ajax.php') ?>',

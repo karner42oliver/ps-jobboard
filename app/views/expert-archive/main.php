@@ -5,7 +5,7 @@
             <form method="get"
                   action="<?php echo is_singular() ? get_permalink(get_the_ID()) : get_post_type_archive_link('jbp_pro') ?>">
                 <div class="search input-group input-group-lg has-feedback" role="search" id="mySearch">
-                    <input style="box-sizing:border-box;border-radius: 0" name="query" value="<?php echo $search ?>" type="search"
+                    <input style="box-sizing:border-box;border-radius: 0" name="query" value="<?php echo esc_attr($search); ?>" type="search"
                            class="form-control pro-search"
                            placeholder="<?php echo __('Suche nach Experten', 'psjb') ?>"/>
 <span class="input-group-btn">
@@ -75,7 +75,7 @@
                                             </div>
                                         </div>
                                         <p>
-                                            <a href="<?php echo get_permalink($pro->id) ?>"> <?php echo $name ?></a>
+                                            <a href="<?php echo get_permalink($pro->id) ?>"> <?php echo esc_html($name); ?></a>
                                         </p>
                                     </div>
                                 </div>

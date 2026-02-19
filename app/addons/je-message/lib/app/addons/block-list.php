@@ -101,7 +101,7 @@ if (!class_exists('MM_Block_List')) {
                 <div class="col-sm-offset-2 col-sm-10">
                     <p class="help-block"><?php _e("Benutzer blockieren, durch Kommas getrennt", mmg()->domain) ?></p>
                     <input id="mm-block-list-input" name="mm_user_block" type="text" class="form-control"
-                           value="<?php echo $block_list ?>"/>
+                           value="<?php echo esc_attr($block_list); ?>"/>
                 </div>
                 <div class="clearfix"></div>
             </div>

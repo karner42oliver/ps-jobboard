@@ -3,7 +3,7 @@
  * Plugin Name: PS-Jobboard
  * Plugin URI: https://cp-psource.github.io/ps-jobboard/
  * Description: Bringe Menschen mit Projekten und Branchenfachleute zusammen - es ist mehr als eine durchschnittliche WordPress-Jobbörse.
- * Version: 1.2.4
+ * Version: 1.0.0
  * Author: PSOURCE
  * Author URI: https://nerdservice.eimen.net
  * Text Domain: psjb
@@ -67,7 +67,7 @@ class Jobs_Experts {
 	public $domain;
 	public $prefix;
 
-	public $version = "1.2.4";
+	public $version = "1.0.0";
 	public $db_version = "1.0";
 
 	public $global = array();
@@ -101,6 +101,7 @@ class Jobs_Experts {
 
 		add_action( 'wp_trash_post', array( &$this, 'delete_je_cache' ) );
 		add_action( 'save_post', array( &$this, 'delete_je_cache' ) );
+		add_action( 'delete_post', array( &$this, 'delete_je_cache' ) );
 
 		$this->upgrade();
 		//
@@ -236,13 +237,15 @@ class Jobs_Experts {
 
 	function delete_je_cache( $post_id ) {
 
-		if ( get_post_type( $post_id ) != 'jbp_job' ) {
+		if ( get_post_type( $post_id ) != 'jbp_job' && get_post_type( $post_id ) != 'jbp_pro' ) {
 			return;
 		}
 
 		global $wpdb;
 		$query = $wpdb->prepare( "DELETE from `{$wpdb->options}` WHERE option_name LIKE %s;", '%' . $wpdb->esc_like( JE_Job_Model::model()->cache_prefix() ) . '%' );
 		$wpdb->query( $query );
+		// Also clear dashboard cache
+		delete_transient( 'jbp_dashboard_stats' );
 	}
 
 	function date_format_php_to_js( $sFormat ) {

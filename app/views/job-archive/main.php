@@ -4,7 +4,7 @@
             <form method="get"
                   action="<?php echo is_singular() ? get_permalink(get_the_ID()) : get_post_type_archive_link('jbp_job') ?>">
                 <div class="search input-group input-group-lg has-feedback" role="search" id="mySearch">
-                    <input style="border-radius: 0;box-sizing: border-box" name="query" value="<?php echo $search ?>"
+                    <input style="border-radius: 0;box-sizing: border-box" name="query" value="<?php echo esc_attr($search); ?>"
                            type="search"
                            class="form-control job-query"
                            placeholder="<?php echo __('Suche nach Job', 'psjb') ?>"/>

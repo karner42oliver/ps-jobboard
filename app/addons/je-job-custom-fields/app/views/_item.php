@@ -1,7 +1,7 @@
 <?php foreach ($models as $model): ?>
-    <li class="je-dd-item" data-id="<?php echo $model->id ?>">
+    <li class="je-dd-item" data-id="<?php echo intval($model->id); ?>">
         <a href="">
-            <?php echo $model->title ?> - <?php echo $model->type ?>
+            <?php echo esc_html($model->title); ?> - <?php echo esc_html($model->type); ?>
         </a>
         <a href="#" class="je-dd-item-open pull-right">
             <i class="fa fa-toggle-down"></i>

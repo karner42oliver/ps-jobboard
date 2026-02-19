@@ -269,9 +269,9 @@ if (!class_exists('MM_Words_Filter')) {
                         <tr>
                             <td><?php echo $word['word'] ?></td>
                             <td><?php echo $word['type'] == 'regex' ? __("Ja", mmg()->domain) : __("Nein", mmg()->domain) ?></td>
-                            <th><a data-key="<?php echo $key ?>" class="edit_badword"
+                            <th><a data-key="<?php echo intval($key); ?>" class="edit_badword"
                                    href="#"><?php _e("Bearbeiten", mmg()->domain) ?></a> |
-                                <a class="remove_badword" data-key="<?php echo $key ?>"
+                                <a class="remove_badword" data-key="<?php echo intval($key); ?>"
                                    href="#"><?php _e("Entfernen", mmg()->domain) ?></a></th>
                         </tr>
                     <?php endforeach; ?>

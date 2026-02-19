@@ -148,16 +148,20 @@ if (!class_exists('IG_Grid')) {
             $args = array();
             $class = get_class($this->model);
             //getting items
-            $orderby = !empty($_GET["orderby"]) ? mysql_real_escape_string($_GET["orderby"]) : 'ASC';
-            $order = !empty($_GET["order"]) ? mysql_real_escape_string($_GET["order"]) : '';
-            if (!empty($orderby) & !empty($order)) {
+            $orderby = !empty($_GET["orderby"]) ? sanitize_key($_GET["orderby"]) : 'id';
+            $order = !empty($_GET["order"]) ? strtoupper(sanitize_key($_GET["order"])) : 'ASC';
+            // Only allow valid order values
+            if (!in_array($order, array('ASC', 'DESC'))) {
+                $order = 'ASC';
+            }
+            if (!empty($orderby) && !empty($order)) {
                 $args['orderby'] = $orderby;
                 $args['order'] = $order;
             }
             $totalitems = count($class::all());
             $perpage = $this->per_page;
-            $paged = !empty($_GET["paged"]) ? mysql_real_escape_string($_GET["paged"]) : '';
-            if (empty($paged) || !is_numeric($paged) || $paged <= 0) {
+            $paged = !empty($_GET["paged"]) ? intval($_GET["paged"]) : 1;
+            if ($paged <= 0) {
                 $paged = 1;
             }
             $totalpages = ceil($totalitems / $perpage);

@@ -25,7 +25,7 @@ class JE_Expert_Search_Shortcode_Controller extends IG_Request
         <form method="get"
                   action="<?php echo get_post_type_archive_link('jbp_pro') ?>">
                 <div class="search input-group input-group-lg has-feedback" role="search" id="mySearch">
-                    <input style="box-sizing:border-box;border-radius: 0" name="query" value="<?php echo $search ?>" type="search"
+                    <input style="box-sizing:border-box;border-radius: 0" name="query" value="<?php echo esc_attr($search); ?>" type="search"
                            class="form-control pro-search"
                            placeholder="<?php echo $atts['search_placeholder'] ?>"/>
                             <span class="input-group-btn">

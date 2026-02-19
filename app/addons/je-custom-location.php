@@ -78,7 +78,7 @@ class JE_Custom_Location extends IG_Request
             <p><?php echo sprintf(__("Um <strong>umgekehrte Geokodierung</strong> zu aktivieren, musst Du einen gültigen <a href=\"%s\">API Schlüssel</a> von Google eingeben."),
                     "https://developers.google.com/maps/documentation/javascript/get-api-key") ?></p>
             <label><?php _e("API Schlüssel ", 'psjb') ?></label>&nbsp;
-            <input value="<?php echo $api ?>" type="text" name="api"/>
+            <input value="<?php echo esc_attr($api); ?>" type="text" name="api"/>
 
             <div class="clearfix"></div>
             <br/>

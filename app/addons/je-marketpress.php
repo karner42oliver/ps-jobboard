@@ -40,7 +40,7 @@ class JE_MarketPress
     {
         $class = "error";
         $message = __("Die Erweiterung <strong>MarketPress Integration</strong> von <strong>PS Jobboard</strong> benötigt <strong>MarketPress</strong>", 'psjb');
-        echo "<div class=\"$class\"> <p>$message</p></div>";
+        printf('<div class="%s"><p>%s</p></div>', esc_attr($class), wp_kses_post($message));
     }
 
     function active($id, $meta)

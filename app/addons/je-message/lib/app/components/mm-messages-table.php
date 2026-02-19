@@ -20,7 +20,7 @@ class MM_Messages_Table extends WP_List_Table
     {
         parent::__construct(array_merge(array(
             'plural' => 'messages',
-            'autoescape' => false,
+            'autoescape' => true,
         ), $args));
     }
 
@@ -82,9 +82,9 @@ class MM_Messages_Table extends WP_List_Table
         //How many to display per page?
         $perpage = 10;
         //Which page is this?
-        $paged = !empty($_GET["paged"]) ? mysql_real_escape_string($_GET["paged"]) : '';
+        $paged = !empty($_GET["paged"]) ? intval($_GET["paged"]) : 1;
         //Page Number
-        if (empty($paged) || !is_numeric($paged) || $paged <= 0) {
+        if ($paged <= 0) {
             $paged = 1;
         }
         $offset = ($this->get_pagenum() - 1) * $perpage;
